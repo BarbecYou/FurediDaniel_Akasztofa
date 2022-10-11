@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:gravity="center_horizontal">
+
+    <LinearLayout
+        android:id="@+id/betuLinearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/minuszBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/buttonbackround"
+            android:text="-" />
+
+        <TextView
+            android:id="@+id/tippTextView"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:text="A"
+            android:textSize="20sp"
+            android:textAlignment="center"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/pluszBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/buttonbackround"
+            android:text="+" />
+    </LinearLayout>
+
+    <Button
+        android:layout_width="90dp"
+        android:layout_height="50dp"
+        android:id="@+id/tippelBtn"
+        android:layout_below="@id/betuLinearLayout"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:text="TIPPEL"
+        android:backgroundTint="#969696"
+       />
+
+    <ImageView
+        android:id="@+id/hangmanImg"
+        android:layout_width="500dp"
+        android:layout_height="500dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/akasztofa00" />
+    <TextView
+        android:id="@+id/resultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="akasztofa"
+        android:textSize="40sp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:textAlignment="center"/>
+
+</RelativeLayout>
