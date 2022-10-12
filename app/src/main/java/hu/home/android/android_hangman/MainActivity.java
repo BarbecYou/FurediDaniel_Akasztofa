@@ -1,9 +1,12 @@
 package hu.home.android.android_hangman;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,8 +37,9 @@ public class MainActivity extends AppCompatActivity {
     private String veletlenSzo;
     private String kiirtSzo;
 
-    private char aktivBetu;
-    private List<String> tippeltBetuk;
+    private char[] betuk;
+    private int aktivBetu;
+    private ArrayList<String> tippeltBetuk;
     private int[] kepek = IntStream.range(R.drawable.akasztofa00, R.drawable.akasztofa13 + 1).toArray();
     private int hibak;
 
@@ -45,59 +49,87 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt("aktivBetu", aktivBetu);
+        outState.putInt("hibak", hibak);
+        outState.putString("kiirtSzo", kiirtSzo);
+        outState.putString("veletlenSzo", veletlenSzo);
+        outState.putStringArrayList("tippeltBetuk", tippeltBetuk);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         init();
         addEventListeners();
+        if (savedInstanceState != null){
+            Log.d("masodikInstance", "masodik ");
+            aktivBetu = savedInstanceState.getInt("aktivBetu");
+            hibak = savedInstanceState.getInt("hibak");
+            kiirtSzo = savedInstanceState.getString("kiirtSzo");
+            veletlenSzo = savedInstanceState.getString("veletlenSzo");
+            tippeltBetuk = savedInstanceState.getStringArrayList("tippeltBetuk");
+
+            tippTextView.setText(String.valueOf(betuk[aktivBetu]));
+            if (tippeltBetuk.contains(String.valueOf(betuk[aktivBetu]))){
+                tippTextView.setTextColor(getResources().getColor(R.color.black));
+            }
+            resultTextView.setText(kiirtSzo);
+            hangmanImg.setImageResource(kepek[hibak]);
+        }
     }
 
     private void addEventListeners() {
         minuszBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (aktivBetu == 'A') {
-                    aktivBetu = 'Z';
+                if (aktivBetu == 0) {
+                    aktivBetu = betuk.length - 1;
                 } else {
                     aktivBetu--;
                 }
-                if (tippeltBetuk.contains(String.valueOf(aktivBetu))) {
+                if (tippeltBetuk.contains(String.valueOf(betuk[aktivBetu]))) {
                     tippTextView.setTextColor(getResources().getColor(R.color.black));
                 } else {
                     tippTextView.setTextColor(Color.parseColor("#d11723"));
                 }
-                tippTextView.setText(String.valueOf(aktivBetu));
+                tippTextView.setText(String.valueOf(betuk[aktivBetu]));
             }
         });
         pluszBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (aktivBetu == 'Z') {
-                    aktivBetu = 'A';
+                if (aktivBetu == betuk.length - 1) {
+                    aktivBetu = 0;
                 } else {
                     aktivBetu++;
                 }
-                if (tippeltBetuk.contains(String.valueOf(aktivBetu))) {
+                if (tippeltBetuk.contains(String.valueOf(betuk[aktivBetu]))) {
                     tippTextView.setTextColor(getResources().getColor(R.color.black));
                 } else {
                     tippTextView.setTextColor(Color.parseColor("#d11723"));
                 }
-                tippTextView.setText(String.valueOf(aktivBetu));
+                tippTextView.setText(String.valueOf(betuk[aktivBetu]));
             }
         });
         tippelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 tippTextView.setTextColor(getResources().getColor(R.color.black));
-                if (tippeltBetuk.contains(String.valueOf(aktivBetu))) {
+                if (tippeltBetuk.contains(String.valueOf(betuk[aktivBetu]))) {
                     Toast.makeText(MainActivity.this, "Ezt a betűt már tippelte", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                tippeltBetuk.add(String.valueOf(aktivBetu));
-                if (veletlenSzo.toUpperCase().indexOf(aktivBetu) == -1) {
+                tippeltBetuk.add(String.valueOf(betuk[aktivBetu]));
+                if (veletlenSzo.toUpperCase().indexOf(betuk[aktivBetu]) == -1) {
 
                     hibak++;
+                    Toast.makeText(MainActivity.this, "Hibás tipp!", Toast.LENGTH_SHORT).show();
                     hangmanImg.setImageResource(kepek[hibak]);
                     Log.d("vereseg", String.valueOf(hibak));
                     if (hibak == 13){
@@ -117,11 +149,12 @@ public class MainActivity extends AppCompatActivity {
                                 }).setCancelable(false).show();
                     }
                 } else {
+                    Toast.makeText(MainActivity.this, "Helyes tipp!", Toast.LENGTH_SHORT).show();
                     sb = new StringBuilder(kiirtSzo);
                     for (int i = 0; i < veletlenSzo.length(); i++) {
                         char tempChar = veletlenSzo.toUpperCase().charAt(i);
-                        if (tempChar == aktivBetu) {
-                            sb.setCharAt(i * 2, aktivBetu);
+                        if (tempChar == betuk[aktivBetu]) {
+                            sb.setCharAt(i * 2, betuk[aktivBetu]);
                         }
                     }
                     kiirtSzo = sb.toString();
@@ -150,10 +183,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void ujJatek() {
         rnd = new Random();
-        szavakLista = new ArrayList<>(Arrays.asList("almafa", "halaszle", "karacsonyfa", "toltottkaposzta", "magyarorszag",
-                "sapka", "kakukktojas", "disznotap", "alkoholmergezes", "parajfozelek", "zoldtea", "futball", "kosarlaba",
-                "epitkezes", "magyartanar", "iskolaudvar", "jatszoter", "hajlektalan", "budapest", "romania",
-                "starwars", "tvmusor", "akasztofajatek", "asztalitenisz", "kecskeviadal", "bananpure", "tukortojas"));
+        szavakLista = new ArrayList<>(Arrays.asList("almafa", "halászlé", "karácsonyfa", "töltöttkáposzta", "magyarország",
+                "sapka", "kakukktojás", "disznótáp", "alkoholmérgezés", "parajfőzelék", "zöldtea", "futball", "kosárlabda",
+                "építkezés", "magyartanár", "iskolaudvar", "játszótér", "hajléktalan", "budapest", "románia",
+                "starwars", "tvműsor", "akasztófajáték", "asztalitenisz", "kecskeviadal", "banánpüré", "tükörtojás"));
         veletlenSzo = szavakLista.get(rnd.nextInt(szavakLista.size()));
         sb = new StringBuilder();
         for (int i = 0; i < veletlenSzo.length(); i++) {
@@ -164,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("veletlen", veletlenSzo);
         resultTextView.setText(kiirtSzo);
 
-        aktivBetu = 'A';
+        aktivBetu = 0;
         tippeltBetuk = new ArrayList<>();
         hibak = 0;
         hangmanImg.setImageResource(kepek[0]);
@@ -179,6 +212,8 @@ public class MainActivity extends AppCompatActivity {
         tippTextView.setTextColor(Color.parseColor("#d11723"));
         hangmanImg = findViewById(R.id.hangmanImg);
         resultTextView = findViewById(R.id.resultTextView);
+        betuk = new char[] {'A', 'Á', 'B','C','D','E','É','F','G','H','I','Í','J','K','L','M',
+                'O','Ó','Ö','Ő','P','Q','R','S','T','U','Ú','Ü','Ű','V','W','X','Y','Z'};
 
         ujJatek();
     }
